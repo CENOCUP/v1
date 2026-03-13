@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="pt-pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CenoCup Champions Elite V67</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@700&family=Montserrat:wght@300;400;700&family=Orbitron:wght@400;700&display=swap');
+
+        :root {
+            --ucl-dark: #000c2d;
+            --ucl-blue: #001d4d;
+            --ucl-gold: #c3a361;
+            --glass: rgba(255, 255, 255, 0.05);
+            --danger: #ff4b2b;
+            --success: #28a745;
+        }
+
+        body {
+            background: var(--ucl-dark);
+            background-image: radial-gradient(circle at top, #002d72 0%, #000c2d 100%);
+            color: #fff;
+            font-family: 'Montserrat', sans-serif;
+            margin: 0;
+            min-height: 100vh;
+        }
+
+        .container { width: 95%; max-width: 1200px; margin: 0 auto; padding: 20px 0; }
+        
+        header { 
+            text-align: center; padding: 40px 0; cursor: pointer;
+            border-bottom: 1px solid rgba(195, 163, 97, 0.3); margin-bottom: 25px;
+        }
+        header h1 { 
+            font-family: 'Cinzel', serif; font-size: clamp(2rem, 8vw, 3.5rem); letter-spacing: 8px; margin: 0; 
+            background: linear-gradient(to bottom, #fff 0%, var(--ucl-gold) 100%);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+        }
+
+        .tabs { display: flex; gap: 8px; justify-content: center; margin-bottom: 25px; flex-wrap: wrap; }
+        .tab-btn {
+            background: transparent; border: 1px solid var(--ucl-gold);
+            color: var(--ucl-gold); padding: 10px 18px; border-radius: 20px;
+            font-weight: 700; font-size: 0.7rem; cursor: pointer; transition: 0.3s;
+            text-transform: uppercase;
+        }
+        .tab-btn.active { background: var(--ucl-gold); color: var(--ucl-dark); box-shadow: 0 0 15px rgba(195,163,97,0.4); }
+
+        .card { 
+            background: var(--glass); backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1); padding: 25px; 
+            border-radius: 15px; margin-bottom: 20px;
+        }
+
+        .table-wrapper { overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; min-width: 900px; }
+        th { color: var(--ucl-gold); padding: 15px; border-bottom: 2px solid var(--ucl-gold); text-transform: uppercase; font-size: 0.7rem; }
+        td { padding: 15px; border-bottom: 1px solid rgba(255, 255, 255, 0.05); text-align: center; font-size: 0.9rem; }
+        
+        .avatar { width: 45px; height: 45px; border-radius: 50%; border: 2px solid var(--ucl-gold); object-fit: cover; background: #000; }
+
+        .grid-layout { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 20px; }
+        
+        /* Hall da Fama Cards */
+        .epoch-card { 
+            background: linear-gradient(145deg, rgba(255,255,255,0.05), rgba(0,0,0,0.4));
+            border: 1px solid rgba(195, 163, 97, 0.3); padding: 20px; border-radius: 15px; 
+        }
+        .podium-item { display: flex; align-items: center; gap: 12px; padding: 8px; margin-bottom: 6px; border-radius: 10px; background: rgba(255,255,255,0.02); }
+        .podium-item.ouro { border: 1px solid var(--ucl-gold); background: linear-gradient(90deg, rgba(195, 163, 97, 0.2) 0%, transparent 100%); }
+        .podium-item.rebaixado { border-left: 4px solid var(--danger); background: rgba(255, 75, 43, 0.05); }
+
+        /* Power Ranking */
+        .power-card { background: rgba(0,0,0,0.4); border-radius: 20px; padding: 25px; border: 1px solid rgba(255,255,255,0.1); text-align: center; transition: 0.3s; }
+        .dna-display { font-family: 'Orbitron'; font-size: 2.2rem; color: var(--ucl-gold); margin: 15px 0; }
+
+        /* Análises */
+        .stat-box { background: rgba(255,255,255,0.03); margin-bottom: 8px; padding: 12px; border-radius: 8px; display: flex; align-items: center; gap: 12px; border-left: 3px solid var(--ucl-gold); }
+        .stat-box.neg { border-left-color: var(--danger); }
+
+        #admin-panel { display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 95%; max-width: 1000px; background: var(--ucl-dark); border: 2px solid var(--ucl-gold); z-index: 1000; padding: 30px; border-radius: 15px; overflow-y: auto; max-height: 85vh; }
+        .overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 999; backdrop-filter: blur(5px); }
+        input { background: rgba(255,255,255,0.05); border: 1px solid #444; color: #fff; padding: 8px; border-radius: 4px; width: 100%; }
+    </style>
+</head>
+<body>
+
+<div class="overlay" id="overlay" onclick="closeAdmin()"></div>
+
+<div class="container">
+    <header onclick="askAdmin()">
+        <h1>CENO CUP</h1>
+        <div style="font-size:0.65rem; color:var(--ucl-gold); letter-spacing:4px; font-weight:700;">CHAMPIONS ELITE DATA V67</div>
+    </header>
+
+    <div id="admin-panel">
+        <h2 style="font-family:Cinzel; color:var(--ucl-gold);">ADMIN DASHBOARD</h2>
+        <div style="display:flex; gap:10px; margin-bottom:20px;">
+            <button onclick="exportData()" style="flex:1; padding:10px;">EXPORTAR</button>
+            <button onclick="document.getElementById('fIn').click()" style="flex:1; padding:10px;">IMPORTAR</button>
+            <input type="file" id="fIn" style="display:none" onchange="importData(event)">
+        </div>
+        <div style="display:flex; gap:10px; margin-bottom:20px;">
+            <button onclick="saveAll()" style="background:var(--success); color:white; padding:12px; flex:2;">SALVAR DADOS</button>
+            <button onclick="closeSeason()" style="background:var(--danger); color:white; padding:12px; flex:1;">FECHAR ÉPOCA</button>
+        </div>
+        <div id="editor-rows"></div>
+        <button onclick="addNewPlayer()" style="width:100%; padding:10px; margin-top:10px;">+ NOVO TÉCNICO</button>
+    </div>
+
+    <div class="tabs">
+        <button class="tab-btn active" id="tab-tabela" onclick="showView('tabela')">TEMPORADA</button>
+        <button class="tab-btn" id="tab-hall" onclick="showView('hall')">HALL DA FAMA</button>
+        <button class="tab-btn" id="tab-ranking" onclick="showView('ranking')">GERAL</button>
+        <button class="tab-btn" id="tab-power" onclick="showView('power')">POWER RANKING</button>
+        <button class="tab-btn" id="tab-stats" onclick="showView('stats')">ANÁLISES</button>
+        <button class="tab-btn" id="tab-evo" onclick="showView('evo')">DESENVOLVIMENTO</button>
+    </div>
+
+    <div id="view-tabela" class="view card">
+        <select id="season-selector" onchange="renderTabela(this.value)" style="width:100%; padding:12px; margin-bottom:15px; background:var(--ucl-blue); color:white; border:1px solid var(--ucl-gold); border-radius:8px; font-weight:700;"></select>
+        <div class="table-wrapper"><table><thead><tr><th>FOTO</th><th>TÉCNICO</th><th>J</th><th>V</th><th>E</th><th>D</th><th>GP</th><th>GS</th><th>SG</th><th>PTS</th></tr></thead><tbody id="body-tabela"></tbody></table></div>
+    </div>
+
+    <div id="view-hall" class="view grid-layout" style="display:none"></div>
+    
+    <div id="view-ranking" class="view card" style="display:none">
+        <div class="table-wrapper"><table><thead><tr><th>POS</th><th>TÉCNICO</th><th>PART.</th><th>PTS</th><th>J</th><th>V</th><th>E</th><th>D</th><th>GP</th><th>GS</th><th>SG</th></tr></thead><tbody id="body-ranking"></tbody></table></div>
+    </div>
+
+    <div id="view-power" class="view grid-layout" style="display:none"></div>
+    <div id="view-stats" class="view grid-layout" style="display:none"></div>
+    <div id="view-evo" class="view card" style="display:none"><div id="evo-content"></div></div>
+</div>
+
+<script>
+    const KEY = 'cenocup_master_v67';
+    let db = JSON.parse(localStorage.getItem(KEY)) || { atual: [], historico: [] };
+
+    const calculateDNA = (j) => {
+        if (!j.j || j.j === 0) return 0;
+        const ppj = j.pts / j.j;
+        const win_rate = (j.v / j.j) * 100;
+        const sg_ratio = (j.gp - j.gc) / j.j;
+        let score = (ppj * 20) + (win_rate * 0.4) + (sg_ratio * 5) + (j.titulos * 12) + (j.participacoes * 2) - (j.rebaixamentos * 10);
+        return Math.max(0, parseFloat(score.toFixed(1)));
+    };
+
+    function getFullData() {
+        let stats = {};
+        const proc = (dados, isH = false) => {
+            if(!dados || !dados.length) return;
+            let sorted = [...dados].sort((a,b) => ((b.v*3)+b.e) - ((a.v*3)+a.e) || (b.gp-b.gc) - (a.gp-a.gc));
+            dados.forEach(j => {
+                if(!stats[j.tecnico]) stats[j.tecnico] = { t: j.tecnico, f: j.foto, v:0, e:0, d:0, gp:0, gc:0, j:0, pts:0, titulos:0, rebaixamentos:0, participacoes:0 };
+                stats[j.tecnico].v += (j.v||0); stats[j.tecnico].e += (j.e||0); stats[j.tecnico].d += (j.d||0);
+                stats[j.tecnico].gp += (j.gp||0); stats[j.tecnico].gc += (j.gc||0);
+                stats[j.tecnico].j += ((j.v||0)+(j.e||0)+(j.d||0));
+                stats[j.tecnico].pts += ((j.v||0)*3+(j.e||0));
+                stats[j.tecnico].participacoes++;
+            });
+            if(isH && sorted.length > 0) {
+                stats[sorted[0].tecnico].titulos++;
+                if(sorted.length > 1) stats[sorted[sorted.length-1].tecnico].rebaixamentos++;
+            }
+        };
+        db.historico.forEach(h => proc(h.dados, true));
+        proc(db.atual, false);
+        return Object.values(stats);
+    }
+
+    function renderTabela(idx) {
+        let d = idx === 'atual' ? db.atual : db.historico[idx].dados;
+        let list = [...d].sort((a,b) => ((b.v*3)+b.e) - ((a.v*3)+a.e) || (b.gp-b.gc) - (a.gp-a.gc));
+        document.getElementById('body-tabela').innerHTML = list.map(j => `<tr>
+            <td><img src="${j.foto||''}" class="avatar" onerror="this.src='https://via.placeholder.com/50'"></td>
+            <td style="text-align:left; font-weight:700;">${j.tecnico}</td>
+            <td>${(j.v||0)+(j.e||0)+(j.d||0)}</td><td>${j.v||0}</td><td>${j.e||0}</td><td>${j.d||0}</td>
+            <td>${j.gp||0}</td><td>${j.gc||0}</td><td>${(j.gp||0)-(j.gc||0)}</td>
+            <td style="color:var(--ucl-gold); font-weight:700;">${(j.v||0)*3+(j.e||0)}</td>
+        </tr>`).join('');
+    }
+
+    function renderHall() {
+        const cont = document.getElementById('view-hall');
+        if (db.historico.length === 0) { cont.innerHTML = `<div class="card" style="grid-column: 1/-1;">Nenhum histórico disponível.</div>`; return; }
+        
+        cont.innerHTML = db.historico.slice().reverse().map(h => {
+            const s = [...h.dados].sort((a,b) => ((b.v*3)+b.e) - ((a.v*3)+a.e) || (b.gp-b.gc) - (a.gp-a.gc));
+            const row = (i, b, cl) => {
+                if(!s[i]) return '';
+                return `<div class="podium-item ${cl}">
+                    <span style="font-size:1rem; width:20px;">${b}</span>
+                    <img src="${s[i].foto}" class="avatar" style="width:30px;height:30px;">
+                    <div style="flex:1; font-weight:700; font-size:0.8rem;">${s[i].tecnico}</div>
+                    <div style="text-align:right; font-size:0.7rem; opacity:0.8;">${(s[i].v*3)+s[i].e}P <span style="color:var(--ucl-gold)">(${s[i].gp-s[i].gc} SG)</span></div>
+                </div>`;
+            };
+            const ult = s.length - 1;
+            return `<div class="epoch-card">
+                <div style="text-align:center; color:var(--ucl-gold); margin-bottom:12px; font-weight:700; font-family:Cinzel; border-bottom:1px solid rgba(195,163,97,0.2); padding-bottom:5px;">${h.nome.toUpperCase()}</div>
+                ${row(0, '🥇', 'ouro')}${row(1, '🥈', '')}${row(2, '🥉', '')}
+                <div style="margin-top:10px; border-top:1px dashed rgba(255,75,43,0.3); padding-top:8px;">
+                    <div style="font-size:0.5rem; color:var(--danger); text-align:center; font-weight:700; text-transform:uppercase;">Lanterna</div>
+                    ${row(ult, '💀', 'rebaixado')}
+                </div>
+            </div>`;
+        }).join('');
+    }
+
+    function renderStats() {
+        const all = getFullData().filter(j => j.j > 0);
+        const cont = document.getElementById('view-stats');
+        const block = (title, data, label, isNeg = false) => `
+            <div class="card">
+                <h4 style="margin-top:0; color:var(--ucl-gold); font-size:0.7rem; text-transform:uppercase;">${title}</h4>
+                ${data.slice(0,3).map((j,i)=>`
+                    <div class="stat-box ${isNeg?'neg':''}">
+                        <img src="${j.f}" class="avatar" style="width:30px;height:30px;">
+                        <div style="font-size:0.8rem; font-weight:700;">${j.t}</div>
+                        <div style="margin-left:auto; color:var(--ucl-gold); font-size:0.75rem; font-family:Orbitron;">${label}: ${j.val}</div>
+                    </div>`).join('')}
+            </div>`;
+
+        cont.innerHTML = 
+            block("📈 TOP EFICIÊNCIA (%)", all.map(j=>({...j, val: ((j.pts/(j.j*3))*100).toFixed(1) + "%"})).sort((a,b)=>parseFloat(b.val)-parseFloat(a.val)), "APR") +
+            block("⭐ MAIS PARTICIPAÇÕES", all.map(j=>({...j, val: j.participacoes})).sort((a,b)=>b.val-a.val), "PART") +
+            block("🛡️ MENOS DERROTAS", all.map(j=>({...j, val: j.d})).sort((a,b)=>a.val-b.val), "DERR") +
+            block("🤝 REIS DO EMPATE", all.map(j=>({...j, val: j.e})).sort((a,b)=>b.val-a.val), "EMP") +
+            block("🔥 MELHOR ATAQUE", all.map(j=>({...j, val: (j.gp/j.j).toFixed(2)})).sort((a,b)=>b.val-a.val), "GP/J") +
+            block("🧤 MELHOR DEFESA", all.map(j=>({...j, val: (j.gc/j.j).toFixed(2)})).sort((a,b)=>a.val-b.val), "GS/J") +
+            block("🧊 PIOR ATAQUE", all.map(j=>({...j, val: (j.gp/j.j).toFixed(2)})).sort((a,b)=>a.val-b.val), "GP/J", true) +
+            block("🏚️ PIOR DEFESA", all.map(j=>({...j, val: (j.gc/j.j).toFixed(2)})).sort((a,b)=>b.val-a.val), "GS/J", true) +
+            block("💀 REBAIXAMENTOS", all.filter(j=>j.rebaixamentos>0).map(j=>({...j, val: j.rebaixamentos})).sort((a,b)=>b.val-a.val), "VEZES", true);
+    }
+
+    function renderPower() {
+        const all = getFullData().sort((a,b) => calculateDNA(b) - calculateDNA(a));
+        document.getElementById('view-power').innerHTML = all.map((j, i) => `
+            <div class="power-card">
+                <img src="${j.f}" class="avatar" style="width:70px; height:70px;">
+                <div style="margin-top:10px; font-weight:700; font-family:Cinzel;">${j.t}</div>
+                <div class="dna-display">${calculateDNA(j)}</div>
+                <div style="font-size:0.6rem; color:var(--ucl-gold); font-weight:700; letter-spacing:1px;">DNA RANK #${i+1}</div>
+            </div>`).join('');
+    }
+
+    function renderEvo() {
+        const all = getFullData();
+        document.getElementById('evo-content').innerHTML = all.map(j => {
+            const media = j.pts / (j.j || 1);
+            const atual = db.atual.find(a => a.tecnico === j.t);
+            const ptsAtu = atual ? (atual.v * 3 + atual.e) / ((atual.v+atual.e+atual.d)||1) : 0;
+            const diff = ptsAtu - media;
+            const st = diff > 0.1 ? 'ALTA 🔥' : diff < -0.1 ? 'QUEDA 📉' : 'ESTÁVEL ⚖️';
+            return `<div style="display:flex; justify-content:space-between; padding:15px; border-bottom:1px solid rgba(255,255,255,0.05); align-items:center;">
+                <div style="display:flex; gap:15px; align-items:center;">
+                    <img src="${j.f}" class="avatar" style="width:35px; height:35px;">
+                    <div><b>${j.t}</b><br><small style="color:var(--ucl-gold)">DNA: ${calculateDNA(j)}</small></div>
+                </div>
+                <div style="text-align:right;"><b>${st}</b></div>
+            </div>`;
+        }).join('');
+    }
+
+    function renderRanking() {
+        const all = getFullData().sort((a,b) => b.pts - a.pts);
+        document.getElementById('body-ranking').innerHTML = all.map((j, i) => `<tr>
+            <td>${i+1}º</td><td style="text-align:left; font-weight:700;">${j.t}</td>
+            <td style="color:var(--ucl-gold); font-weight:700;">${j.participacoes}</td>
+            <td>${j.pts}</td><td>${j.j}</td><td>${j.v}</td><td>${j.e}</td><td>${j.d}</td><td>${j.gp}</td><td>${j.gc}</td><td>${j.gp-j.gc}</td>
+        </tr>`).join('');
+    }
+
+    function showView(v) {
+        document.querySelectorAll('.view').forEach(x => x.style.display = 'none');
+        document.querySelectorAll('.tab-btn').forEach(x => x.classList.remove('active'));
+        const el = document.getElementById('view-' + v);
+        el.style.display = (v==='hall'||v==='power'||v==='stats') ? 'grid' : 'block';
+        document.getElementById('tab-' + v).classList.add('active');
+        if(v==='tabela') initSelector(); if(v==='hall') renderHall(); if(v==='ranking') renderRanking(); if(v==='power') renderPower(); if(v==='stats') renderStats(); if(v==='evo') renderEvo();
+    }
+
+    function initSelector() {
+        const s = document.getElementById('season-selector');
+        let h = `<option value="atual">TEMPORADA ATUAL</option>`;
+        db.historico.forEach((x, i) => h += `<option value="${i}">${x.nome.toUpperCase()}</option>`);
+        s.innerHTML = h; renderTabela('atual');
+    }
+
+    function askAdmin() { if(prompt("Senha:") === '123') { document.getElementById('admin-panel').style.display = 'block'; document.getElementById('overlay').style.display = 'block'; renderEditor(); } }
+    function closeAdmin() { document.getElementById('admin-panel').style.display = 'none'; document.getElementById('overlay').style.display = 'none'; }
+    function saveAll() { localStorage.setItem(KEY, JSON.stringify(db)); location.reload(); }
+    function renderEditor() {
+        document.getElementById('editor-rows').innerHTML = db.atual.map((j, i) => `
+            <div style="display:grid; grid-template-columns: 1fr 1fr repeat(5, 0.4fr) 30px; gap:5px; margin-bottom:10px;">
+                <input type="text" value="${j.tecnico}" onchange="db.atual[${i}].tecnico=this.value">
+                <input type="text" value="${j.foto||''}" onchange="db.atual[${i}].foto=this.value">
+                <input type="number" value="${j.v||0}" onchange="db.atual[${i}].v=parseInt(this.value)">
+                <input type="number" value="${j.e||0}" onchange="db.atual[${i}].e=parseInt(this.value)">
+                <input type="number" value="${j.d||0}" onchange="db.atual[${i}].d=parseInt(this.value)">
+                <input type="number" value="${j.gp||0}" onchange="db.atual[${i}].gp=parseInt(this.value)">
+                <input type="number" value="${j.gc||0}" onchange="db.atual[${i}].gc=parseInt(this.value)">
+                <button onclick="db.atual.splice(${i},1); renderEditor();" style="color:red; background:none; border:none; cursor:pointer; font-weight:700;">✕</button>
+            </div>`).join('');
+    }
+    function addNewPlayer() { db.atual.push({tecnico:"Novo", foto:"", v:0, e:0, d:0, gp:0, gc:0}); renderEditor(); }
+    function exportData() { const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([JSON.stringify(db)], {type: "application/json"})); a.download = "cenocup_v67.json"; a.click(); }
+    function importData(e) { const r = new FileReader(); r.onload = (x) => { db = JSON.parse(x.target.result); saveAll(); }; r.readAsText(e.target.files[0]); }
+    function closeSeason() {
+        const n = prompt("Nome da Temporada (ex: Época 1):");
+        if(n) { db.historico.push({nome: n, dados: JSON.parse(JSON.stringify(db.atual))}); db.atual.forEach(j => {j.v=0;j.e=0;j.d=0;j.gp=0;j.gc=0;}); saveAll(); }
+    }
+    initSelector();
+</script>
+</body>
+</html>
